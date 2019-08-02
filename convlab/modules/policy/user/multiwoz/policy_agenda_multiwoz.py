@@ -88,6 +88,8 @@ class UserPolicyAgendaMultiWoz(UserPolicy):
             session_over (boolean): True to terminate session, otherwise session continues.
             reward (float): Reward given by user.
         """
+        print("UserPolicy\tstate:%s\tsys_action:%s"  %(state, sys_action))
+        #raise "Error"
         self.__turn += 2
 
         # At the beginning of a dialog when there is no NLU.
@@ -114,7 +116,7 @@ class UserPolicyAgendaMultiWoz(UserPolicy):
 
         # transform to DA
         action = self._transform_usract_out(action)
-
+        print("UserPolicy\treturn, action:%s" % (action))
         return action, session_over, reward
 
     def _reward(self):

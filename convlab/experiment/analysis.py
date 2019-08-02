@@ -31,7 +31,9 @@ def gen_return(agent, env):
     env.clock.tick('epi')
     env.clock.tick('t')
     while not done:
+        print("gen_return #1")
         action = agent.act(obs)
+        print("gen_return #2")
         next_obs, reward, done, info = env.step(action)
         agent.update(obs, action, reward, next_obs, done)
         obs = next_obs
@@ -63,6 +65,8 @@ def gen_result(agent, env):
 
 
 def gen_avg_result(agent, env, num_eval=NUM_EVAL):
+    print("gen_avg_result", agent, env, num_eval)
+
     returns, lens, successes, precs, recs, f1s, book_rates = [], [], [], [], [], [], []
     for _ in range(num_eval):
         returns.append(gen_result(agent, env))

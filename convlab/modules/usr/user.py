@@ -35,11 +35,14 @@ class UserSimulator:
             session_over (boolean): True to terminate session, else session continues.
             reward (float): The reward given by the user.
         """
-
+        print("user.py\tUserSimulator\t", input)
+        print("user.py\tUserSimulator\t", context)
         if self.nlu_model is not None:
             sys_act = self.nlu_model.parse(input, context)
         else:
             sys_act = input
+        print("user.py\tUserSimulator\tsys_act:", sys_act)
+         
         self.sys_act = sys_act
         action, session_over, reward = self.policy.predict(None, sys_act)
         if self.nlg_model is not None:

@@ -59,7 +59,8 @@ class MILU(NLU):
         """
         if len(utterance) == 0:
             return {}
-
+        print("NLU parse: utter=", utterance)
+        print("NLU parse: context=", context)
         if self.context_size > 0 and len(context) > 0:
             context_tokens = sum([self.tokenizer.split_words(utterance+" SENT_END") for utterance in context[-self.context_size:]], [])
         else:
@@ -67,7 +68,7 @@ class MILU(NLU):
         tokens = self.tokenizer.split_words(utterance)
         instance = self.dataset_reader.text_to_instance(context_tokens, tokens)
         outputs = self.model.forward_on_instance(instance)
-
+        print("NLU parsed: outputs", outputs)
         return outputs["dialog_act"]
 
 

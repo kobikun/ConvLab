@@ -64,6 +64,8 @@ class RuleBasedMultiwozBot(SysPolicy):
         self.kb_result = {}
 
         DA = {}
+        
+        print("SysPolicy\tstate[user_action]:%s" % state['user_action'])
 
         if 'user_action' in state and (len(state['user_action']) > 0):
             user_action = state['user_action']
@@ -96,7 +98,7 @@ class RuleBasedMultiwozBot(SysPolicy):
 
         for user_act in user_action:
             domain, intent_type = user_act.split('-')
-
+            print("SysPolicy\tItera_User_Action\tdomain:%s, intent_type:%s" % (domain, intent_type))
             # Respond to general greetings
             if domain == 'general':
                 self._update_greeting(user_act, state, DA)
@@ -130,8 +132,9 @@ class RuleBasedMultiwozBot(SysPolicy):
                     del DA[user_act]
 
         # print("Sys action: ", DA)
-
+        print("SysPolicy\tDA:%s" % DA)
         if DA == {}:
+            print("SysPolicy\tDA is null, -> general-greet :: %s" % DA)
             return {'general-greet': [['none', 'none']]}
         return DA
 
@@ -639,7 +642,7 @@ class RuleInformBot(SysPolicy):
 
     def predict(self, state):
 
-        print('state', state.keys())
+        print('RuleInformBot state', state.keys())
         for key in state:
             print(key, json.dumps(state[key], indent=2))
 

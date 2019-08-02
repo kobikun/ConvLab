@@ -16,6 +16,8 @@ from convlab.lib import logger, util
 from convlab.lib.decorator import lab_api
 from convlab.modules import nlu, dst, word_dst, nlg, state_encoder, action_decoder
 
+import traceback
+
 logger = logger.get_logger(__name__)
 
 
@@ -142,13 +144,18 @@ class DialogAgent(Agent):
     @lab_api
     def act(self, obs):
         '''Standard act method from algorithm.'''
+        print("System : obs: %s" % obs)
         action = self.algorithm.act(self.body.encoded_state)
+        print("System : action: %s" % action)
+
         self.body.action = action
 
         output_act, decoded_action = self.action_decode(action, self.body.state) 
+        print("System : output_act:%s, decoded_action:%s" % (output_act, decoded_action))
 
         logger.act(f'System action: {action}')
         logger.nl(f'System utterance: {decoded_action}')
+        #print(traceback.print_stack())
 
         return decoded_action
 
@@ -158,10 +165,14 @@ class DialogAgent(Agent):
             self.dst.state['history'].append([str(action)])
 
         # NLU parsing
+        print("")
+        print("NLU parsing : obs: %s" % obs)
         input_act = self.nlu.parse(obs, sum(self.dst.state['history'], []) if self.dst else []) if self.nlu else obs
+        print("NLU parsed -> input_act : %s" % input_act)
 
         # state tracking 
         state = self.dst.update(input_act) if self.dst else input_act 
+        print("DST update -> state : %s" % state)
 
         # update history 
         if self.dst:
@@ -169,11 +180,13 @@ class DialogAgent(Agent):
 
         # encode state 
         encoded_state = self.state_encoder.encode(state) if self.state_encoder else state 
+        print("state_encoder : encoded_state:%s" % encoded_state)
 
         if self.nlu and self.dst:  
             self.dst.state['user_action'] = input_act 
         elif self.dst and not isinstance(self.dst, word_dst.MDBTTracker):  # for act-in act-out agent
             self.dst.state['user_action'] = obs
+        print("dst.state['user_action']: %s" % (self.dst.state['user_action']))
 
         logger.nl(f'User utterance: {obs}')
         logger.act(f'Inferred user action: {input_act}')

@@ -26,5 +26,6 @@ class UserPolicyVHUS(UserPolicy):
         self.goal = Goal(self.domain_goals)
         
     def predict(self, state, sys_action):
+        print("UserPolicyVHUS\tstate:%s, sys_action:%s" % (state, sys_action))
         usr_action, terminal = self.user.predict(state, sys_action)
         return usr_action, terminal, 0

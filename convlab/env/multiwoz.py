@@ -106,7 +106,9 @@ class MultiWozEnvironment(object):
         return deepcopy(self.simulator.sys_act)
 
     def step(self, action):
+        print("MultiWozEnvironment\taction:%s" %(action))
         user_response, user_act, session_over, reward = self.simulator.response(action, self.history)
+        print("MultiWozEnvironment\tafter response\tuser_response:%s, user_act:%s, session_over:%s, reward:%s" %(user_response, user_act, session_over, reward))
         self.last_act = user_act
         self.history.extend([f'sys_response', f'user_response'])
         logger.act(f'Inferred system action: {self.get_sys_act()}')
@@ -119,6 +121,7 @@ class MultiWozEnvironment(object):
             else:
                 reward = -1.0
         self.env_info = [State(user_response, reward, session_over)] 
+        logger.act(f"env_info\t{user_response}, {reward}, {session_over}")
         return self.env_info 
 
     def rule_policy(self, state, algorithm, body):
