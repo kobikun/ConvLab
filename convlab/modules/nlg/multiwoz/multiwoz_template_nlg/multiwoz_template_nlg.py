@@ -46,6 +46,26 @@ slot2word = {
     # 'TrainID': 'TrainID'
 }
 
+from operator import itemgetter
+def choice_jaccard(candidate_lists, intents):
+    _intents = set([x.lower() for x in intents])
+    _candidate_lists = [ (x, x.lower().split(" ")) for x in candidate_lists]
+    _candi_score = []
+    for idx, (c_sent, c_tokens) in enumerate(_candidate_lists):
+        print(idx, c_sent)
+        c_tokens_set = set(c_tokens)
+        _union = c_tokens_set.union(_intents)
+        _intersection = c_tokens_set.intersection(_intents)
+        sim = 1.0*(len(_intersection)/len(_union))
+        _candi_score.append(sim)
+    pair_candi = list(zip([ x[0] for x in _candidate_lists], _candi_score))
+    pair_candi = sorted(pair_candi, key=itemgetter(1), reverse=True)
+    print(pair_candi)
+    return pair_candi[0][0]
+
+
+
+
 
 class MultiwozTemplateNLG(NLG):
     def __init__(self, is_user, mode="manual"):
@@ -72,6 +92,8 @@ class MultiwozTemplateNLG(NLG):
         :return: generated sentence
         """
         mode = self.mode
+        print("NLG generate\tdialog_acts:%s" % dialog_acts)
+        print("NLG mode:%s" % mode)
         try:
             is_user = self.is_user
             if mode=='manual':
@@ -119,7 +141,10 @@ class MultiwozTemplateNLG(NLG):
 
     def _manual_generate(self, dialog_acts, template):
         sentences = ''
+        print("NLG manual_generate\tdialog_acts:%s" % dialog_acts)
+        #print("NLG manual_generate\ttemplate:%s" % template)
         for dialog_act, slot_value_pairs in dialog_acts.items():
+            print("NLG dialog-act item iter\t%s, %s" % (dialog_act, slot_value_pairs))
             intent = dialog_act.split('-')
             if 'Select'==intent[1]:
                 slot2values = {}
@@ -143,6 +168,7 @@ class MultiwozTemplateNLG(NLG):
                         sentences += sentence
                     else:
                         sentence = random.choice(template[dialog_act][slot])
+                        print("NLG select sentence : %s", sentence)
                         sentence = self._postprocess(sentence)
                         sentences += sentence
             elif 'general'==intent[0] and dialog_act in template:
@@ -152,11 +178,19 @@ class MultiwozTemplateNLG(NLG):
             else:
                 for slot, value in slot_value_pairs:
                     if dialog_act in template and slot in template[dialog_act]:
-                        sentence = random.choice(template[dialog_act][slot])
+                        #sentence = random.choice(template[dialog_act][slot])
+                        sentence = choice_jaccard(template[dialog_act][slot], intent)
+
+                        print("NLG select sentence : %s" % (template[dialog_act][slot]))
                         sentence = sentence.replace('#{}-{}#'.format(dialog_act.upper(), slot.upper()), str(value))
+                        print("NLG select sentence : %s", sentence)
                     else:
                         if slot in slot2word:
-                            sentence = 'The {} is {} . '.format(slot2word[slot], str(value))
+                            _sub_ne = slot2word[slot]
+                            if _sub_ne.lower() in ['phone']:
+                                _sub_ne = "%s number" % (_sub_ne)
+                            sentence = 'The {} {} is {} . '.format(intent[0], _sub_ne, str(value))
+                            print("slot based\t", sentence)
                         else:
                             sentence = ''
                     sentence = self._postprocess(sentence)
